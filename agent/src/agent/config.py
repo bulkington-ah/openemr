@@ -41,6 +41,10 @@ OPENEMR_SSL_VERIFY: bool = os.getenv("OPENEMR_SSL_VERIFY", "false").lower() == "
 # The API key for Anthropic's Claude, which powers the agent's reasoning
 ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 
+# Which Claude model to use. Sonnet is a good balance of speed and capability
+# for tool-use tasks. You can switch to "claude-opus-4-20250514" for harder reasoning.
+ANTHROPIC_MODEL: str = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
+
 # --- Observability ---
 # LangSmith is a platform that records every step the agent takes,
 # so you can debug and evaluate its behavior. These two env vars
