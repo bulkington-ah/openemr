@@ -47,21 +47,21 @@ def test_config_defaults() -> None:
 
 
 def test_health_endpoint() -> None:
-    """The /health endpoint should return 200 OK."""
+    """The /agent/health endpoint should return 200 OK."""
     from agent.app import app
 
     client = TestClient(app)
-    response = client.get("/health")
+    response = client.get("/agent/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 
 
 def test_chat_endpoint_placeholder() -> None:
-    """The /chat endpoint should accept a message and return a response."""
+    """The /agent/chat endpoint should accept a message and return a response."""
     from agent.app import app
 
     client = TestClient(app)
-    response = client.post("/chat", json={"message": "Hello"})
+    response = client.post("/agent/chat", json={"message": "Hello"})
     assert response.status_code == 200
     data = response.json()
     assert "response" in data
