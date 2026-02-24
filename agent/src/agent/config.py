@@ -27,6 +27,16 @@ OPENEMR_BASE_URL: str = os.getenv("OPENEMR_BASE_URL", "https://localhost:9300")
 OPENEMR_CLIENT_ID: str = os.getenv("OPENEMR_CLIENT_ID", "")
 OPENEMR_CLIENT_SECRET: str = os.getenv("OPENEMR_CLIENT_SECRET", "")
 
+# OpenEMR admin credentials — used for the OAuth2 "password grant" flow.
+# The password grant sends username/password directly to the token endpoint
+# to get an access token. The default Docker setup uses admin/pass.
+OPENEMR_USERNAME: str = os.getenv("OPENEMR_USERNAME", "admin")
+OPENEMR_PASSWORD: str = os.getenv("OPENEMR_PASSWORD", "pass")
+
+# SSL verification — False for local dev with self-signed certs.
+# Set to "true" in production where you have real SSL certificates.
+OPENEMR_SSL_VERIFY: bool = os.getenv("OPENEMR_SSL_VERIFY", "false").lower() == "true"
+
 # --- LLM (Large Language Model) ---
 # The API key for Anthropic's Claude, which powers the agent's reasoning
 ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")

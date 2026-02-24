@@ -18,6 +18,7 @@ def test_imports() -> None:
     import agent.agent  # noqa: F401
     import agent.app  # noqa: F401
     import agent.config  # noqa: F401
+    import agent.openemr_client  # noqa: F401
     import agent.tools  # noqa: F401
     import agent.tools.billing  # noqa: F401
     import agent.tools.clinical  # noqa: F401
@@ -29,10 +30,19 @@ def test_imports() -> None:
 
 def test_config_defaults() -> None:
     """Config should load with sensible defaults even without a .env file."""
-    from agent.config import OPENEMR_BASE_URL, OPENEMR_SITE
+    from agent.config import (
+        OPENEMR_BASE_URL,
+        OPENEMR_PASSWORD,
+        OPENEMR_SITE,
+        OPENEMR_SSL_VERIFY,
+        OPENEMR_USERNAME,
+    )
 
     assert OPENEMR_BASE_URL == "https://localhost:9300"
     assert OPENEMR_SITE == "default"
+    assert OPENEMR_USERNAME == "admin"
+    assert OPENEMR_PASSWORD == "pass"
+    assert OPENEMR_SSL_VERIFY is False
 
 
 def test_health_endpoint() -> None:
