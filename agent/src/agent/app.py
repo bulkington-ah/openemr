@@ -12,8 +12,6 @@ data using Pydantic models.
 
 Run locally with:
     cd agent && uvicorn agent.app:app --reload
-
-TODO (Step 5): Add session management so conversations persist across turns.
 """
 
 from fastapi import FastAPI
@@ -32,12 +30,14 @@ class ChatRequest(BaseModel):
     """What the client sends to the /chat endpoint."""
 
     message: str  # The clinician's question in plain English
+    session_id: str | None = None  # Optional: continue an existing conversation
 
 
 class ChatResponse(BaseModel):
     """What the /chat endpoint sends back."""
 
     response: str  # The agent's answer
+    session_id: str  # The session ID (new or existing) for follow-up messages
 
 
 @app.get("/health")
@@ -53,6 +53,11 @@ async def chat(request: ChatRequest) -> ChatResponse:
     The client sends a natural language question, and the agent
     figures out which OpenEMR API calls to make, fetches the data,
     and returns a human-friendly answer.
+
+    Include a session_id to continue a previous conversation. If omitted,
+    a new session is created and its ID is returned in the response.
     """
-    result = await run_agent(request.message)
-    return ChatResponse(response=result)
+    response_text, session_id = await run_agent(
+        request.message, session_id=request.session_id
+    )
+    return ChatResponse(response=response_text, session_id=session_id)

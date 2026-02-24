@@ -18,11 +18,12 @@ We just provide the model, tools, and system prompt.
 from __future__ import annotations
 
 import logging
+import uuid
 from collections.abc import Callable, Coroutine
 from typing import Any
 
 from langchain_anthropic import ChatAnthropic
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import BaseMessage, HumanMessage
 from langchain_core.tools import StructuredTool
 from langgraph.prebuilt import create_react_agent
 from pydantic import SecretStr
@@ -125,6 +126,19 @@ def _build_tools() -> list[StructuredTool]:
 
 _agent = None  # Will hold the compiled LangGraph agent
 
+# ---------------------------------------------------------------------------
+# Session store (in-memory)
+# ---------------------------------------------------------------------------
+# Maps session IDs to their message histories. This lets a clinician have
+# a multi-turn conversation (e.g., "Tell me about Phil Dixon" → "What are
+# his allergies?" where "his" refers to Phil from the previous turn).
+#
+# For MVP this is a plain dict — sessions are lost on server restart.
+# TODO: Swap for LangGraph's RedisSaver or SqliteSaver checkpointer so
+# sessions persist across restarts.
+
+_sessions: dict[str, list[BaseMessage]] = {}
+
 
 def _get_agent():  # type: ignore[no-untyped-def]
     """Create the LangGraph ReAct agent (lazily, on first call)."""
@@ -155,31 +169,48 @@ def _get_agent():  # type: ignore[no-untyped-def]
 # ---------------------------------------------------------------------------
 
 
-async def run_agent(message: str) -> str:
+async def run_agent(message: str, session_id: str | None = None) -> tuple[str, str]:
     """Process a user message and return the agent's response.
 
     This is the main entry point that the FastAPI server calls.
+
+    When a session_id is provided, the agent continues the existing
+    conversation (remembering previous messages). When omitted, a new
+    session is created automatically.
 
     When ANTHROPIC_API_KEY is not set (e.g., in CI), returns a placeholder
     response so that tests can pass without real API credentials.
 
     Args:
         message: The clinician's natural language question.
+        session_id: Optional session ID to continue an existing conversation.
 
     Returns:
-        The agent's response as a string.
+        A tuple of (response_text, session_id).
     """
+    # Generate a session ID if none provided
+    if session_id is None:
+        session_id = uuid.uuid4().hex
+
     # Fallback for CI / environments without an API key
     if not ANTHROPIC_API_KEY:
-        return f"[Agent placeholder — no API key configured] You asked: {message}"
+        return (
+            f"[Agent placeholder — no API key configured] You asked: {message}",
+            session_id,
+        )
 
     agent = _get_agent()
 
-    result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=message)]},
-    )
+    # Build the message list: previous history + the new message
+    history = _sessions.get(session_id, [])
+    messages = [*history, HumanMessage(content=message)]
 
-    # The result contains the full message history. The last message
-    # is the agent's final answer (an AIMessage).
+    result = await agent.ainvoke({"messages": messages})
+
+    # Save the full message history (including tool calls and responses)
+    # back to the session so the next turn has full context.
+    _sessions[session_id] = result["messages"]
+
+    # The last message is the agent's final answer (an AIMessage).
     last_message = result["messages"][-1]
-    return str(last_message.content)
+    return str(last_message.content), session_id
