@@ -1,1 +1,46 @@
-[]
+[
+  {
+    "id": "eval-001",
+    "description": "Basic patient lookup by name",
+    "input": "Find patient Phil Dixon",
+    "expected_tools": ["patient_search"],
+    "expected_in_response": ["Phil", "Dixon", "DOB", "pid"],
+    "category": "happy_path"
+  },
+  {
+    "id": "eval-002",
+    "description": "Patient allergies require two tool calls",
+    "input": "What allergies does Phil Dixon have?",
+    "expected_tools": ["patient_search", "get_allergies"],
+    "expected_in_response": ["allerg"],
+    "notes": "Agent should first search for the patient, then fetch allergies using the uuid",
+    "category": "happy_path"
+  },
+  {
+    "id": "eval-003",
+    "description": "Patient medications use pid (not uuid)",
+    "input": "What medications is Phil Dixon currently taking?",
+    "expected_tools": ["patient_search", "get_medications"],
+    "expected_in_response": ["medication"],
+    "notes": "get_medications requires pid, not uuid. Agent must use the correct ID.",
+    "category": "happy_path"
+  },
+  {
+    "id": "eval-004",
+    "description": "Patient not found returns clear message",
+    "input": "Look up patient Nonexistent Person",
+    "expected_tools": ["patient_search"],
+    "expected_in_response": ["no patient", "not found", "No patients"],
+    "notes": "Response should clearly state no patient was found, not hallucinate data",
+    "category": "edge_case"
+  },
+  {
+    "id": "eval-005",
+    "description": "Ambiguous name returns multiple matches",
+    "input": "Find patient Smith",
+    "expected_tools": ["patient_search"],
+    "expected_in_response": ["which", "multiple", "clarify", "patient(s)"],
+    "notes": "If multiple Smiths exist, agent should list them and ask which one the user means",
+    "category": "edge_case"
+  }
+]
