@@ -76,6 +76,33 @@ resource "aws_security_group" "main" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # OpenEMR HTTP (docker-compose maps container port 80 → host port 8300)
+  ingress {
+    description = "OpenEMR HTTP"
+    from_port   = 8300
+    to_port     = 8300
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # OpenEMR HTTPS (docker-compose maps container port 443 → host port 9300)
+  ingress {
+    description = "OpenEMR HTTPS"
+    from_port   = 9300
+    to_port     = 9300
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # phpMyAdmin (docker-compose maps container port 80 → host port 8310)
+  ingress {
+    description = "phpMyAdmin"
+    from_port   = 8310
+    to_port     = 8310
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   # Allow ALL outbound traffic (the server can reach the internet)
   egress {
     from_port   = 0
