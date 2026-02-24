@@ -81,6 +81,11 @@ jobs:
                 --name openemr-agent \
                 --network development-easy-light_default \
                 -p 8000:8000 \
+                -p 8501:8501 \
+                -e ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }} \
+                -e OPENEMR_BASE_URL=https://openemr:443 \
+                -e OPENEMR_SSL_VERIFY=false \
+                -e AGENT_BACKEND_URL=http://localhost:8000 \
                 --restart unless-stopped \
                 ${{ secrets.ECR_REPOSITORY }}:latest
             else

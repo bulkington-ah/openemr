@@ -1,11 +1,14 @@
 # Dockerfile for the OpenEMR AI Agent
 #
-# Builds a container that runs the FastAPI server (the agent's HTTP API).
+# Builds a container that runs both:
+# - FastAPI server (port 8000) — the agent's HTTP API
+# - Streamlit frontend (port 8501) — the chat UI
+#
 # The CI/CD pipeline builds this image, pushes it to AWS ECR, and deploys
 # it to EC2 where it runs alongside OpenEMR.
 #
 # Build:   docker build -t openemr-agent .
-# Run:     docker run -p 8000:8000 --env-file .env openemr-agent
+# Run:     docker run -p 8000:8000 -p 8501:8501 --env-file .env openemr-agent
 
 FROM python:3.12-slim
 
@@ -20,12 +23,12 @@ WORKDIR /app
 COPY pyproject.toml .
 RUN pip install --no-cache-dir .
 
-# Copy the source code
+# Copy the source code and startup script
 COPY src/ src/
+COPY start.sh .
 
-# The FastAPI server listens on port 8000
-EXPOSE 8000
+# FastAPI on 8000, Streamlit on 8501
+EXPOSE 8000 8501
 
-# Start the server. "agent.app:app" means: in the agent package, find
-# app.py, and use the FastAPI instance named "app".
-CMD ["uvicorn", "agent.app:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start both services via the startup script
+CMD ["bash", "start.sh"]
