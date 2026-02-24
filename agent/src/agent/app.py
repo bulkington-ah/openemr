@@ -3,8 +3,8 @@
 This file defines the web API that clients (like our Streamlit frontend)
 use to talk to the agent. It exposes two endpoints:
 
-- GET  /health  — Simple check that the server is running
-- POST /chat    — Send a message, get back the agent's response
+- GET  /agent/health  — Simple check that the server is running
+- POST /agent/chat    — Send a message, get back the agent's response
 
 FastAPI is a modern Python web framework that automatically generates
 API documentation (visit /docs when running) and validates request/response
@@ -27,26 +27,26 @@ app = FastAPI(
 
 
 class ChatRequest(BaseModel):
-    """What the client sends to the /chat endpoint."""
+    """What the client sends to the /agent/chat endpoint."""
 
     message: str  # The clinician's question in plain English
     session_id: str | None = None  # Optional: continue an existing conversation
 
 
 class ChatResponse(BaseModel):
-    """What the /chat endpoint sends back."""
+    """What the /agent/chat endpoint sends back."""
 
     response: str  # The agent's answer
     session_id: str  # The session ID (new or existing) for follow-up messages
 
 
-@app.get("/health")
+@app.get("/agent/health")
 async def health() -> dict[str, str]:
     """Health check endpoint. Returns 200 if the server is running."""
     return {"status": "ok"}
 
 
-@app.post("/chat", response_model=ChatResponse)
+@app.post("/agent/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest) -> ChatResponse:
     """Process a chat message through the AI agent.
 

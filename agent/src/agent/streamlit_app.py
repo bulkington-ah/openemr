@@ -66,7 +66,7 @@ if user_input:
         with st.spinner("Thinking..."):
             try:
                 resp = requests.post(
-                    f"{BACKEND_URL}/chat",
+                    f"{BACKEND_URL}/agent/chat",
                     json={
                         "message": user_input,
                         "session_id": st.session_state.session_id,

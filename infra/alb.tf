@@ -70,7 +70,7 @@ resource "aws_lb_target_group" "agent_api" {
 
   health_check {
     enabled             = true
-    path                = "/health" # Exists in app.py
+    path                = "/agent/health"
     port                = "8000"
     protocol            = "HTTP"
     healthy_threshold   = 2
