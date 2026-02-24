@@ -34,3 +34,9 @@ coverage/js-unit
 
 # phpstan
 tmp-phpstan/*
+
+# Terraform
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/deploy_key
