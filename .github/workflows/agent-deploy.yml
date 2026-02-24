@@ -58,7 +58,7 @@ jobs:
 
             # Clone the repo if this is the first deploy, otherwise pull latest
             if [ ! -d "$REPO_DIR/.git" ]; then
-              git clone https://github.com/bulkington-ah/openemr.git $REPO_DIR
+              git clone https://github.com/bulkington-ah/openagentemr.git $REPO_DIR
             else
               cd $REPO_DIR
               git fetch origin
