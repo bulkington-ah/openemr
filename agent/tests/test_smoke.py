@@ -23,6 +23,7 @@ def test_imports() -> None:
     import agent.tools.billing  # noqa: F401
     import agent.tools.clinical  # noqa: F401
     import agent.tools.drug_interactions  # noqa: F401
+    import agent.tools.encounters  # noqa: F401
     import agent.tools.patient  # noqa: F401
     import agent.tools.scheduling  # noqa: F401
     import agent.verification  # noqa: F401
