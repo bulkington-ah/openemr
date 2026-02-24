@@ -86,6 +86,8 @@ jobs:
                 -e OPENEMR_BASE_URL=https://openemr:443 \
                 -e OPENEMR_SSL_VERIFY=false \
                 -e AGENT_BACKEND_URL=http://localhost:8000 \
+                -e LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }} \
+                -e LANGCHAIN_TRACING_V2=true \
                 --restart unless-stopped \
                 ${{ secrets.ECR_REPOSITORY }}:latest
             else
