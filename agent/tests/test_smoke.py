@@ -15,15 +15,15 @@ from fastapi.testclient import TestClient
 def test_imports() -> None:
     """Verify all modules can be imported without crashing."""
     import agent  # noqa: F401
-    import agent.config  # noqa: F401
     import agent.agent  # noqa: F401
     import agent.app  # noqa: F401
+    import agent.config  # noqa: F401
     import agent.tools  # noqa: F401
-    import agent.tools.patient  # noqa: F401
-    import agent.tools.clinical  # noqa: F401
-    import agent.tools.scheduling  # noqa: F401
     import agent.tools.billing  # noqa: F401
+    import agent.tools.clinical  # noqa: F401
     import agent.tools.drug_interactions  # noqa: F401
+    import agent.tools.patient  # noqa: F401
+    import agent.tools.scheduling  # noqa: F401
     import agent.verification  # noqa: F401
 
 
