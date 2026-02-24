@@ -33,15 +33,14 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       # Build the agent Docker image and push it to ECR
-      # This step will fail gracefully if agent/Dockerfile doesn't exist yet
+      # Skips gracefully if agent/Dockerfile doesn't exist yet
       - name: Build and push Docker image
-        working-directory: agent
         run: |
-          if [ -f Dockerfile ]; then
-            docker build -t ${{ secrets.ECR_REPOSITORY }}:latest .
+          if [ -f agent/Dockerfile ]; then
+            docker build -t ${{ secrets.ECR_REPOSITORY }}:latest agent/
             docker push ${{ secrets.ECR_REPOSITORY }}:latest
           else
-            echo "No Dockerfile yet — skipping image build"
+            echo "No agent/Dockerfile yet — skipping image build"
           fi
 
       # SSH into EC2: clone/pull the repo, start OpenEMR + MariaDB,
