@@ -31,6 +31,4 @@ st.info(
 user_input = st.chat_input("Ask a question about a patient...")
 if user_input:
     st.chat_message("user").write(user_input)
-    st.chat_message("assistant").write(
-        f"[Placeholder] You asked: {user_input}"
-    )
+    st.chat_message("assistant").write(f"[Placeholder] You asked: {user_input}")

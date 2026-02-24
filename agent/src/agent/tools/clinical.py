@@ -50,9 +50,7 @@ def get_vitals(patient_id: str, encounter_id: str) -> str:
     Returns:
         Vital signs as a formatted string.
     """
-    return (
-        f"[Stub] get_vitals({patient_id!r}, {encounter_id!r}) — not yet implemented"
-    )
+    return f"[Stub] get_vitals({patient_id!r}, {encounter_id!r}) — not yet implemented"
 
 
 def get_medical_problems(patient_uuid: str) -> str:

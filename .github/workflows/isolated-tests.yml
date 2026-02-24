@@ -12,10 +12,16 @@ on:
     branches:
     - master
     - rel-*
+    paths-ignore:
+    - "agent/**"
+    - "gauntlet_docs/**"
   pull_request:
     branches:
     - master
     - rel-*
+    paths-ignore:
+    - "agent/**"
+    - "gauntlet_docs/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'pull_request' && github.event.number || github.run_id }}

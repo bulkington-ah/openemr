@@ -35,6 +35,9 @@ coverage/js-unit
 # phpstan
 tmp-phpstan/*
 
+# Claude Code project instructions (local only)
+CLAUDE.md
+
 # Terraform
 infra/.terraform/
 infra/*.tfstate

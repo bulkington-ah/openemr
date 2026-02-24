@@ -24,10 +24,16 @@ on:
     branches:
     - master
     - rel-*
+    paths-ignore:
+    - "agent/**"
+    - "gauntlet_docs/**"
   pull_request:
     branches:
     - master
     - rel-*
+    paths-ignore:
+    - "agent/**"
+    - "gauntlet_docs/**"
 
 permissions:
   contents: read
