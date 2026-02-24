@@ -1,0 +1,10 @@
+# Copy this file to terraform.tfvars and fill in real values.
+# NEVER commit terraform.tfvars to git! (it's in .gitignore)
+#
+# Generate strong passwords with:
+#   openssl rand -base64 24
+
+db_root_password  = "CHANGE_ME_use_openssl_rand"
+db_app_password   = "CHANGE_ME_use_openssl_rand"
+anthropic_api_key = "sk-ant-api03-..."
+langchain_api_key = "lsv2_pt_..."

@@ -1,5 +1,5 @@
-# Deploy the agent service to EC2
-# Triggers on push to master when agent/ or infra/ files change
+# Deploy the agent service to ECS Fargate
+# Triggers on push to master when agent/ files change
 # Also supports manual triggering for initial setup
 name: Agent Deploy
 
@@ -9,7 +9,6 @@ on:
       - master
     paths:
       - "agent/**"
-      - "docker/development-easy-light/**"
   workflow_dispatch: # Allows manual triggering from the GitHub Actions UI
 
 jobs:
@@ -43,68 +42,22 @@ jobs:
             echo "No agent/Dockerfile yet — skipping image build"
           fi
 
-      # SSH into EC2: clone/pull the repo, start OpenEMR + MariaDB,
-      # and deploy the agent if the image exists
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          script: |
-            set -ex
-
-            REPO_DIR=/home/ubuntu/openemr
-
-            # Clone the repo if this is the first deploy, otherwise pull latest
-            if [ ! -d "$REPO_DIR/.git" ]; then
-              git clone https://github.com/bulkington-ah/openagentemr.git $REPO_DIR
-            else
-              cd $REPO_DIR
-              git fetch origin
-              git reset --hard origin/master
-            fi
-
-            cd $REPO_DIR
-
-            # Start OpenEMR + MariaDB + phpMyAdmin (idempotent — won't recreate if already running)
-            docker compose -f docker/development-easy-light/docker-compose.yml up -d
-
-            # If the agent image exists in ECR, pull and run it too
-            aws ecr get-login-password --region us-east-1 \
-              | docker login --username AWS --password-stdin ${{ secrets.ECR_REPOSITORY }} || true
-
-            if docker pull ${{ secrets.ECR_REPOSITORY }}:latest 2>/dev/null; then
-              docker stop openemr-agent 2>/dev/null || true
-              docker rm openemr-agent 2>/dev/null || true
-              docker run -d \
-                --name openemr-agent \
-                --network development-easy-light_default \
-                -p 8000:8000 \
-                -p 8501:8501 \
-                -e ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }} \
-                -e OPENEMR_BASE_URL=https://openemr:443 \
-                -e OPENEMR_SSL_VERIFY=false \
-                -e AGENT_BACKEND_URL=http://localhost:8000 \
-                -e LANGCHAIN_API_KEY=${{ secrets.LANGCHAIN_API_KEY }} \
-                -e LANGCHAIN_TRACING_V2=true \
-                --restart unless-stopped \
-                ${{ secrets.ECR_REPOSITORY }}:latest
-            else
-              echo "No agent image in ECR yet — skipping agent deploy"
-            fi
-
-      # Verify OpenEMR is responding
-      - name: Health check
+      # Tell ECS to pull the latest image and restart the service.
+      # --force-new-deployment causes ECS to stop the current task
+      # and start a new one with the latest image, even if the task
+      # definition has not changed.
+      - name: Deploy to ECS
         run: |
-          echo "Waiting for OpenEMR to start (can take up to 3 minutes on first deploy)..."
-          for i in $(seq 1 18); do
-            if curl -sf --insecure https://${{ secrets.EC2_HOST }}:9300/ > /dev/null 2>&1; then
-              echo "OpenEMR is up!"
-              exit 0
-            fi
-            echo "Attempt $i/18 — not ready yet, waiting 10s..."
-            sleep 10
-          done
-          echo "OpenEMR did not respond within 3 minutes — check the EC2 instance"
-          exit 1
+          aws ecs update-service \
+            --cluster openemr-agent-cluster \
+            --service openemr-agent-agent \
+            --force-new-deployment
+
+      # Wait for the rolling deploy to finish.
+      # "services-stable" means the new task is running and healthy.
+      - name: Wait for deployment to stabilize
+        run: |
+          aws ecs wait services-stable \
+            --cluster openemr-agent-cluster \
+            --services openemr-agent-agent
+        timeout-minutes: 10

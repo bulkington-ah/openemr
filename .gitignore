@@ -43,3 +43,7 @@ infra/.terraform/
 infra/*.tfstate
 infra/*.tfstate.backup
 infra/deploy_key
+infra/terraform.tfvars
+infra/remote-state-bootstrap/.terraform/
+infra/remote-state-bootstrap/*.tfstate
+infra/remote-state-bootstrap/*.tfstate.backup

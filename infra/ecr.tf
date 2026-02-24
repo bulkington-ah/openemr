@@ -5,7 +5,7 @@
 # it here. The EC2 instance pulls from here to run it.
 # -------------------------------------------------------
 resource "aws_ecr_repository" "agent" {
-  name = "${var.project_name}"
+  name = var.project_name
 
   # Automatically delete old images when new ones are pushed
   image_tag_mutability = "MUTABLE"

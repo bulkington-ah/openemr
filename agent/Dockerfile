@@ -19,13 +19,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install dependencies first (this layer is cached unless pyproject.toml changes)
+# Copy source code, build config, and startup script
 COPY pyproject.toml .
-RUN pip install --no-cache-dir .
-
-# Copy the source code and startup script
 COPY src/ src/
 COPY start.sh .
+
+# Install the package (includes dependencies)
+# Source must be present before install so hatchling can find src/agent/
+RUN pip install --no-cache-dir .
 
 # FastAPI on 8000, Streamlit on 8501
 EXPOSE 8000 8501
